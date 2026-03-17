@@ -327,6 +327,8 @@ tbody td{padding:8px 8px 8px 0;font-size:14px;vertical-align:middle;}
     <button class="nav-btn" onclick="exportarJSON()" title="Descargar respaldo completo">↓ Exportar</button>
     <label class="nav-btn" style="cursor:pointer;" title="Cargar respaldo">↑ Importar<input type="file" accept=".json" style="display:none;" onchange="importarJSON(event)"></label>
     <button class="nav-btn" onclick="window.print()">⎙ Imprimir</button>
+    <button class="nav-btn" id="btn-guardar-flujo" style="background:var(--success);color:white;border-color:var(--success);display:none;" onclick="F.guardarRegistro()">💾 Guardar Flujo</button>
+    <button class="nav-btn" id="btn-guardar-ec" style="background:var(--gold);color:white;border-color:var(--gold);display:none;" onclick="EC.guardarEstado();mostrarToast('✓ Estado de cuenta guardado')">💾 Guardar Estado</button>
   </div>
 </nav>
 
@@ -510,11 +512,7 @@ tbody td{padding:8px 8px 8px 0;font-size:14px;vertical-align:middle;}
       <div class="meta-field"><label>Referencia interna</label><input type="text" id="ec-referencia" placeholder="Ej: OBR-2025-001"></div>
     </div>
     <div class="body">
-      <!-- FLUJO AUTOMÁTICO: ingresos del cliente desde el flujo -->
-      <div id="ec-flujo-section" style="display:none;">
-        <div class="section-header"><h2>Cobros registrados en Flujo de Efectivo</h2><div class="section-line"></div></div>
-        <div class="ec-panel" id="ec-flujo-panel" style="margin-bottom:24px;"><div class="ec-empty">Sin movimientos del flujo para este cliente.</div></div>
-      </div>
+      <!-- Cobros desde Flujo se integran automáticamente en la sección de pagos -->
 
       <!-- VALUACIONES MANUALES -->
       <div class="section-header">
@@ -634,6 +632,9 @@ function cambiarPestana(id){
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   document.getElementById('tab-'+id).classList.add('active');
+  // Mostrar botón guardar correcto
+  document.getElementById('btn-guardar-flujo').style.display = id==='flujo'?'block':'none';
+  document.getElementById('btn-guardar-ec').style.display   = id==='ec'?'block':'none';
   // Sincronizar datos entre pestañas
   if(id === 'ec'){
     F.recalcular();
@@ -819,7 +820,12 @@ const F = (function(){
     const grid=document.getElementById('f-cajas-grid');
     const entr=Object.entries(cajaSaldo).filter(([,v])=>v!==0);
     if(!entr.length){ grid.innerHTML='<div class="caja-card-empty">Los saldos se calculan automáticamente.</div>'; }
-    else grid.innerHTML=entr.map(([n,s])=>`<div class="caja-card"><div class="caja-card-name">${n}</div><div class="caja-card-usd ${s>=0?'pos':'neg'}">${fmt(s)}</div></div>`).join('');
+    else grid.innerHTML=entr.map(([n,s])=>`
+      <div class="caja-card" style="cursor:pointer;" onclick="abrirHistorialCaja('${n.replace(/'/g,"\\'")}')">
+        <div class="caja-card-name">${n}</div>
+        <div class="caja-card-usd ${s>=0?'pos':'neg'}">${fmt(s)}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--warm-gray);margin-top:3px;letter-spacing:.06em;">Ver historial →</div>
+      </div>`).join('');
     // EC inline
     renderECInline(clienteMovs);
     // Notificar al módulo EC
@@ -1005,16 +1011,34 @@ const EC = (function(){
 
   function actualizarFlujoData(){
     const cli=document.getElementById('ec-cliente').value.trim();
-    const seccion=document.getElementById('ec-flujo-section');
-    const panel=document.getElementById('ec-flujo-panel');
-    if(!cli){ seccion.style.display='none'; return; }
+    if(!cli) return;
     const clienteMovs=window._flujoClienteMovs||{};
-    const movsCli=Object.entries(clienteMovs).find(([k])=>k.toLowerCase()===cli.toLowerCase()||k.toLowerCase().includes(cli.toLowerCase()));
-    if(!movsCli||!movsCli[1].length){ seccion.style.display='none'; return; }
-    seccion.style.display='block';
-    const movs=movsCli[1]; let acum=0;
-    const filas=movs.map(m=>{ acum+=m.monto; return`<tr><td>${m.fecha?m.fecha.split('-').reverse().join('/'):'-'}</td><td style="font-size:13px;color:var(--warm-gray);">${m.concepto||'—'}</td><td><span style="font-family:'DM Mono',monospace;font-size:8px;color:var(--success);background:rgba(74,124,89,.1);padding:2px 5px;">${m.tipo}</span></td><td class="mono">${fmt(m.monto)}</td><td style="font-size:11px;color:var(--warm-gray);font-family:'DM Mono',monospace;">${m.destino||'—'}</td></tr>`; }).join('');
-    panel.innerHTML=`<table class="ec-table"><thead><tr><th style="width:13%">Fecha</th><th style="width:37%">Concepto</th><th style="width:12%">Tipo</th><th style="width:14%" class="r">Monto</th><th style="width:24%">Destino</th></tr></thead><tbody>${filas}</tbody></table><div class="ec-saldo-row"><span class="ec-saldo-lbl">Total cobrado desde Flujo · ${movsCli[0]}</span><span class="ec-saldo-val pos">${fmt(acum)}</span></div>`;
+    const entry=Object.entries(clienteMovs).find(([k])=>k.toLowerCase()===cli.toLowerCase()||k.toLowerCase().includes(cli.toLowerCase()));
+    if(!entry||!entry[1].length) return;
+    // Agregar automáticamente pagos del flujo que no estén ya en la tabla
+    const movs=entry[1];
+    const tbody=document.getElementById('ec-tbody-pag');
+    movs.forEach(m=>{
+      // Verificar si ya existe esta fila (por fecha + monto)
+      const yaExiste=[...tbody.querySelectorAll('tr')].some(tr=>{
+        const f=tr.querySelector('.inp-fecha-pago')?.value||'';
+        const mo=parseFloat(tr.querySelector('.inp-monto-ec')?.dataset.raw||0);
+        return f===m.fecha && Math.abs(mo-m.monto)<0.01;
+      });
+      if(!yaExiste){
+        const fila=crearFilaPago({
+          fecha:m.fecha,
+          modalidad:'Flujo de Efectivo — '+( m.concepto||'Cobro'),
+          monto:m.monto,
+          aplicaA:'— General (sin asignar) —'
+        });
+        // Marcar como proveniente del flujo
+        fila.style.background='rgba(74,124,89,.06)';
+        fila.title='Registrado automáticamente desde Flujo de Efectivo';
+        tbody.appendChild(fila);
+        recalcular();
+      }
+    });
   }
 
   function leerFormulario(){
@@ -1162,7 +1186,44 @@ const EMBEBIDOS=[{id:1000001,cliente:'FORUM',fecha:'2026-02-25',referencia:'',no
 
   refrescarDatalist();
   window._flujoClienteMovs={};
+  // Show correct save button for initial tab
+  document.getElementById('btn-guardar-flujo').style.display='block';
+  document.getElementById('btn-guardar-ec').style.display='none';
 })();
 </script>
+
+<!-- ═══ MODAL HISTORIAL CAJA ═══ -->
+<div class="modal-overlay" id="modal-caja" onclick="if(event.target===this)cerrarHistorialCaja()" style="z-index:3000;">
+  <div class="modal-box" style="width:680px;max-height:85vh;">
+    <div class="modal-stripe"></div>
+    <div class="modal-header">
+      <div>
+        <div class="modal-tag">Flujo de Efectivo · Detalle</div>
+        <div class="modal-title" id="modal-caja-title">Historial de Caja</div>
+      </div>
+      <button class="modal-close" onclick="cerrarHistorialCaja()">×</button>
+    </div>
+    <div class="modal-body" style="padding:0;">
+      <table class="ec-table" style="width:100%;">
+        <thead>
+          <tr>
+            <th style="width:12%;padding:10px 14px;">Fecha</th>
+            <th style="width:11%;padding:10px 14px;">Tipo</th>
+            <th style="width:35%;padding:10px 14px;">Concepto</th>
+            <th style="width:14%;padding:10px 14px;">Contraparte</th>
+            <th style="width:14%;padding:10px 14px;" class="r">Monto USD</th>
+            <th style="width:14%;padding:10px 14px;" class="r">Saldo acum.</th>
+          </tr>
+        </thead>
+        <tbody id="modal-caja-body"></tbody>
+      </table>
+      <div id="modal-caja-empty" class="ec-empty" style="display:none;">Sin movimientos para esta caja.</div>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between;">
+      <div id="modal-caja-resumen" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--warm-gray);"></div>
+      <button class="modal-btn primary" onclick="cerrarHistorialCaja()">Cerrar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
