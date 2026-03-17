@@ -634,6 +634,14 @@ function cambiarPestana(id){
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   document.getElementById('tab-'+id).classList.add('active');
+  // Sincronizar datos entre pestañas
+  if(id === 'ec'){
+    F.recalcular();
+    setTimeout(()=>EC.actualizarFlujoData(), 50);
+  }
+  if(id === 'flujo'){
+    F.recalcular();
+  }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -816,7 +824,8 @@ const F = (function(){
     renderECInline(clienteMovs);
     // Notificar al módulo EC
     window._flujoClienteMovs = clienteMovs;
-    if(document.getElementById('page-ec').classList.contains('active')) EC.actualizarFlujoData();
+    // Siempre actualizar EC — esté visible o no
+    if(typeof EC !== 'undefined') EC.actualizarFlujoData();
   }
 
   function renderECInline(clienteMovs){
