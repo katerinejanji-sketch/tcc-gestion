@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCC — Vista Ejecutiva</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1510; --paper:#faf8f4; --gold:#b8924a;
+  --gold-light:#d4aa6a; --gold-pale:#f0e6d0;
+  --warm-gray:#8a8279; --line:#d8d0c4; --accent:#2c2218;
+  --success:#4a7c59; --danger:#c0392b; --transfer:#3b4f7a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#e8e4dc;font-family:'Cormorant Garamond',serif;color:var(--ink);min-height:100vh;}
+
+/* ═══ NAV ═══ */
+.app-nav{
+  background:var(--ink);display:flex;align-items:stretch;
+  box-shadow:0 2px 12px rgba(0,0,0,.3);position:sticky;top:0;z-index:100;
+}
+.nav-brand{padding:0 28px;display:flex;align-items:center;gap:10px;border-right:1px solid rgba(255,255,255,.08);}
+.nav-logo{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;letter-spacing:-.3px;}
+.nav-tagline{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--warm-gray);}
+.nav-tabs{display:flex;flex:1;}
+.nav-tab{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;
+  padding:0 28px;color:rgba(255,255,255,.45);cursor:pointer;
+  border:none;background:transparent;transition:all .2s;
+  border-bottom:3px solid transparent;display:flex;align-items:center;gap:8px;
+}
+.nav-tab:hover{color:rgba(255,255,255,.75);}
+.nav-tab.active{color:var(--gold-light);border-bottom-color:var(--gold);}
+.nav-status{display:flex;align-items:center;gap:8px;padding:0 20px;border-left:1px solid rgba(255,255,255,.08);}
+.nav-status span{font-family:'DM Mono',monospace;font-size:9px;color:var(--warm-gray);letter-spacing:.08em;}
+.badge-ro{font-family:'DM Mono',monospace;font-size:8px;background:var(--gold);color:white;padding:3px 10px;letter-spacing:.15em;text-transform:uppercase;}
+
+/* ═══ PAGES ═══ */
+.page{display:none;padding:28px 20px;}
+.page.active{display:block;}
+
+/* ═══ LAYOUT ═══ */
+.view-layout{max-width:1200px;margin:0 auto;}
+
+/* ═══ SELECTOR ═══ */
+.selector-bar{
+  background:var(--accent);padding:14px 24px;margin-bottom:24px;
+  display:flex;align-items:center;gap:16px;border-radius:2px;
+  box-shadow:0 4px 16px rgba(0,0,0,.2);
+}
+.selector-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);white-space:nowrap;}
+.selector-select{
+  font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:500;
+  background:rgba(255,255,255,.08);border:1px solid rgba(184,146,74,.3);
+  color:white;padding:6px 12px;outline:none;cursor:pointer;flex:1;max-width:400px;
+}
+.selector-select option{background:var(--accent);color:white;}
+.selector-info{font-family:'DM Mono',monospace;font-size:9px;color:var(--warm-gray);margin-left:auto;letter-spacing:.06em;}
+
+/* ═══ DOCUMENTO ═══ */
+.document{background:var(--paper);box-shadow:0 8px 60px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08);position:relative;overflow:hidden;margin-bottom:32px;}
+.document::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,var(--gold) 0%,var(--gold-light) 50%,var(--gold) 100%);}
+.header{padding:32px 56px 24px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;}
+.logo-text{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--accent);letter-spacing:-.3px;}
+.logo-sub{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.3em;text-transform:uppercase;color:var(--warm-gray);margin-top:2px;}
+.doc-meta{text-align:right;}
+.doc-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--warm-gray);margin-bottom:3px;}
+.doc-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--ink);}
+.doc-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);margin-top:3px;letter-spacing:.1em;}
+.doc-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);margin-top:3px;}
+.meta-section{padding:18px 56px;background:var(--gold-pale);border-bottom:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+.meta-field .mf-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--warm-gray);display:block;margin-bottom:3px;}
+.meta-field .mf-value{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:500;color:var(--ink);border-bottom:1px solid var(--gold);padding:2px 0 3px;}
+.body{padding:28px 56px;}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;margin-top:28px;}
+.section-header:first-child{margin-top:0;}
+.section-header h2{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--warm-gray);white-space:nowrap;}
+.section-line{flex:1;height:1px;background:var(--line);}
+
+/* ═══ TABLAS ═══ */
+.table-wrap{overflow-x:auto;margin-bottom:6px;}
+table{width:100%;border-collapse:collapse;}
+thead tr{border-bottom:2px solid var(--gold);}
+thead th{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--warm-gray);padding:8px 8px 8px 0;text-align:left;font-weight:400;white-space:nowrap;}
+thead th.r{text-align:right;padding-right:0;}
+tbody tr{border-bottom:1px solid var(--line);}
+tbody tr:hover{background:rgba(184,146,74,.03);}
+tbody tr.tipo-ingreso{background:rgba(74,124,89,.04);}
+tbody tr.tipo-egreso{background:rgba(192,57,43,.04);}
+tbody tr.tipo-transferencia{background:rgba(59,79,122,.04);}
+tbody td{padding:8px 8px 8px 0;font-size:14px;vertical-align:middle;}
+tbody td.r{text-align:right;font-family:'DM Mono',monospace;font-size:12px;}
+.tfoot-row td{padding:11px 8px 11px 0;border-top:2px solid var(--gold)!important;border-bottom:none!important;}
+.tot-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--warm-gray);}
+.tot-val{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--ink);}
+.tot-val.pos{color:var(--success);} .tot-val.neg{color:var(--danger);} .tot-val.gold{color:var(--gold);}
+
+/* ═══ NETO BAR ═══ */
+.neto-bar{background:var(--ink);margin:0 -56px 28px;padding:14px 56px;display:flex;justify-content:space-between;align-items:center;border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);}
+.neto-bar .nb-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-light);}
+.neto-bar .nb-val{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white;}
+.neto-bar .nb-val.pos{color:#7ec8a0;} .neto-bar .nb-val.neg{color:#e88;}
+
+/* ═══ CAJAS GRID ═══ */
+.cajas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;}
+.caja-card{background:var(--paper);border:1px solid var(--line);padding:14px 16px;border-radius:2px;}
+.caja-card-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--warm-gray);margin-bottom:4px;}
+.caja-card-usd{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;}
+.caja-card-usd.pos{color:var(--success);} .caja-card-usd.neg{color:var(--danger);}
+
+/* ═══ KPI CARDS ═══ */
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+.kpi-card{background:var(--accent);padding:16px 20px;border-radius:2px;}
+.kpi-card-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+.kpi-card-value{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:white;}
+.kpi-card-value.pos{color:#7ec8a0;} .kpi-card-value.neg{color:#e88;} .kpi-card-value.gold{color:var(--gold-light);}
+
+/* ═══ EC STYLES ═══ */
+.pct-badge{font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(74,124,89,.12);color:var(--success);}
+.pct-badge.pct-zero{background:rgba(138,130,121,.1);color:var(--warm-gray);}
+.pct-badge.pct-full{background:rgba(74,124,89,.2);color:var(--success);}
+.saldo-cell{font-family:'DM Mono',monospace;font-size:12px;color:var(--danger);}
+.saldo-cell.saldo-zero{color:var(--success);}
+
+/* ═══ EMPTY ═══ */
+.empty-msg{font-family:'DM Mono',monospace;font-size:11px;color:var(--warm-gray);text-align:center;padding:40px 20px;letter-spacing:.08em;}
+
+/* ═══ AUTO-REFRESH INDICATOR ═══ */
+.refresh-bar{position:fixed;bottom:0;left:0;right:0;background:var(--ink);padding:8px 24px;display:flex;align-items:center;justify-content:space-between;z-index:100;}
+.refresh-bar span{font-family:'DM Mono',monospace;font-size:9px;color:var(--warm-gray);letter-spacing:.06em;}
+.refresh-dot{width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;margin-right:6px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:768px){
+  .meta-section{grid-template-columns:1fr 1fr;gap:12px;}
+  .header{padding:20px 24px 16px;}
+  .body{padding:20px 24px;}
+  .neto-bar{margin:0 -24px 20px;padding:12px 24px;}
+  .kpi-row{grid-template-columns:1fr;}
+  .selector-bar{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav class="app-nav">
+  <div class="nav-brand">
+    <div>
+      <div class="nav-logo">TCC</div>
+      <div class="nav-tagline">Vista Ejecutiva</div>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('flujo')"><span class="tab-icon">◈</span> Flujo de Caja</button>
+    <button class="nav-tab" onclick="showPage('ec')"><span class="tab-icon">◆</span> Estado de Cuenta</button>
+  </div>
+  <div class="nav-status">
+    <span id="sync-status">☁ Cargando...</span>
+    <span class="badge-ro">Solo lectura</span>
+  </div>
+</nav>
+
+<!-- ═══ FLUJO DE CAJA ═══ -->
+<div class="page active" id="page-flujo">
+  <div class="view-layout">
+    <div class="selector-bar">
+      <span class="selector-label">Período</span>
+      <select class="selector-select" id="sel-flujo" onchange="renderFlujo()"></select>
+      <span class="selector-info" id="flujo-info"></span>
+    </div>
+    <div id="flujo-kpis" class="kpi-row"></div>
+    <div id="flujo-doc" class="document"></div>
+  </div>
+</div>
+
+<!-- ═══ ESTADO DE CUENTA ═══ -->
+<div class="page" id="page-ec">
+  <div class="view-layout">
+    <div class="selector-bar">
+      <span class="selector-label">Cliente</span>
+      <select class="selector-select" id="sel-ec" onchange="renderEC()"></select>
+      <span class="selector-info" id="ec-info"></span>
+    </div>
+    <div id="ec-kpis" class="kpi-row"></div>
+    <div id="ec-doc" class="document"></div>
+  </div>
+</div>
+
+<!-- ═══ REFRESH BAR ═══ -->
+<div class="refresh-bar">
+  <span><span class="refresh-dot"></span> Actualización automática cada 30 segundos</span>
+  <span id="last-update"></span>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   CONFIGURACIÓN
+══════════════════════════════════════════════════════════ */
+const SB_URL = 'https://xqkgrnfgfpvyqjllkiaf.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhxa2dybmZnZnB2eXFqbGxraWFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2Mjk4NjIsImV4cCI6MjA5MDIwNTg2Mn0.PBwEsb3rTu9vXDfXWSpu0CNvLFJNrkbYOX5baLv4otg';
+
+let flujoData = [];
+let ecData = [];
+
+const fmt = n => '$' + parseFloat(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtDate = d => { if(!d) return '—'; const p=d.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; };
+
+/* ══════════════════════════════════════════════════════════
+   SUPABASE READ-ONLY
+══════════════════════════════════════════════════════════ */
+async function loadFromCloud() {
+  try {
+    const [fResp, eResp] = await Promise.all([
+      fetch(`${SB_URL}/rest/v1/flujo?select=*&order=id.desc`, {
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+      }),
+      fetch(`${SB_URL}/rest/v1/estado_cuenta?select=*&order=id.desc`, {
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+      })
+    ]);
+
+    if(fResp.ok) {
+      flujoData = await fResp.json();
+      buildFlujoSelector();
+      renderFlujo();
+    }
+    if(eResp.ok) {
+      ecData = await eResp.json();
+      buildECSelector();
+      renderEC();
+    }
+
+    document.getElementById('sync-status').textContent = '☁ Sincronizado';
+    document.getElementById('sync-status').style.color = '#7ec8a0';
+    document.getElementById('last-update').textContent = 'Última actualización: ' + new Date().toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  } catch(e) {
+    document.getElementById('sync-status').textContent = '⚠ Error de conexión';
+    document.getElementById('sync-status').style.color = '#e88';
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   NAVEGACIÓN
+══════════════════════════════════════════════════════════ */
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-tab')[id==='flujo'?0:1].classList.add('active');
+}
+
+/* ══════════════════════════════════════════════════════════
+   FLUJO DE CAJA
+══════════════════════════════════════════════════════════ */
+function buildFlujoSelector() {
+  const sel = document.getElementById('sel-flujo');
+  sel.innerHTML = flujoData
+    .filter(p => p.periodo && p.periodo !== 'Sin período')
+    .map((p,i) => `<option value="${i}">${p.periodo} — ${(p.movs||[]).length} movs.</option>`)
+    .join('');
+}
+
+function renderFlujo() {
+  const idx = parseInt(document.getElementById('sel-flujo').value) || 0;
+  const filtered = flujoData.filter(p => p.periodo && p.periodo !== 'Sin período');
+  const p = filtered[idx];
+  if(!p) { document.getElementById('flujo-doc').innerHTML='<div class="empty-msg">Sin datos disponibles.</div>'; return; }
+
+  const movs = p.movs || [];
+  let totIngr=0, totEgr=0, totTrf=0;
+  const cajaSaldo = {};
+
+  movs.forEach(m => {
+    const monto = parseFloat(m.monto_usd)||0;
+    if(!monto) return;
+    if(m.tipo==='Ingreso') {
+      totIngr += monto;
+      if(m.destino && !m.destino.toLowerCase().includes('cliente')) cajaSaldo[m.destino] = (cajaSaldo[m.destino]||0) + monto;
+    } else if(m.tipo==='Egreso') {
+      totEgr += monto;
+      if(m.origen && !m.origen.toLowerCase().includes('cliente')) cajaSaldo[m.origen] = (cajaSaldo[m.origen]||0) - monto;
+    } else {
+      totTrf += monto;
+      if(m.origen) cajaSaldo[m.origen] = (cajaSaldo[m.origen]||0) - monto;
+      if(m.destino) cajaSaldo[m.destino] = (cajaSaldo[m.destino]||0) + monto;
+    }
+  });
+
+  const neto = totIngr - totEgr;
+  document.getElementById('flujo-info').textContent = `${movs.length} movimientos · Actualizado: ${p.guardado_en ? new Date(p.guardado_en).toLocaleString('es-VE') : '—'}`;
+
+  // KPIs
+  document.getElementById('flujo-kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-card-label">Ingresos USD</div><div class="kpi-card-value pos">${fmt(totIngr)}</div></div>
+    <div class="kpi-card"><div class="kpi-card-label">Egresos USD</div><div class="kpi-card-value neg">${fmt(totEgr)}</div></div>
+    <div class="kpi-card"><div class="kpi-card-label">Flujo Neto</div><div class="kpi-card-value ${neto>=0?'gold':'neg'}">${fmt(neto)}</div></div>
+  `;
+
+  // Documento
+  const filas = movs.map(m => {
+    const monto = parseFloat(m.monto_usd)||0;
+    if(!monto) return '';
+    const tipoClass = `tipo-${(m.tipo||'').toLowerCase()}`;
+    const tipoBadge = m.tipo==='Ingreso' ? `<span style="color:var(--success);">▲</span>` : m.tipo==='Egreso' ? `<span style="color:var(--danger);">▼</span>` : `<span style="color:var(--transfer);">↔</span>`;
+    return `<tr class="${tipoClass}">
+      <td>${fmtDate(m.fecha)}</td>
+      <td>${tipoBadge} ${m.tipo||'—'}</td>
+      <td>${m.modalidad||'—'}</td>
+      <td>${m.origen||'—'}</td>
+      <td>${m.destino||'—'}</td>
+      <td>${m.concepto||'—'}</td>
+      <td class="r">${monto.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+    </tr>`;
+  }).join('');
+
+  // Cajas
+  const cajasHTML = Object.entries(cajaSaldo).filter(([,v])=>v!==0).map(([n,s]) => `
+    <div class="caja-card">
+      <div class="caja-card-name">${n}</div>
+      <div class="caja-card-usd ${s>=0?'pos':'neg'}">${fmt(s)}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('flujo-doc').innerHTML = `
+    <div class="header">
+      <div><div class="logo-text">Milagros Sánchez</div><div class="logo-sub">Arquitectura · Interiorismo · Construcción</div></div>
+      <div class="doc-meta">
+        <div class="doc-label">Documento</div>
+        <div class="doc-title">Flujo de Caja</div>
+        <div class="doc-sub">Movimientos · Cajas · Clientes · Bs</div>
+        <div class="doc-date">${fmtDate(p.fecha_ini)} — ${fmtDate(p.fecha_fin)}</div>
+      </div>
+    </div>
+    <div class="meta-section">
+      <div class="meta-field"><span class="mf-label">Período</span><div class="mf-value">${p.periodo||'—'}</div></div>
+      <div class="meta-field"><span class="mf-label">Fecha inicio</span><div class="mf-value">${fmtDate(p.fecha_ini)}</div></div>
+      <div class="meta-field"><span class="mf-label">Fecha cierre</span><div class="mf-value">${fmtDate(p.fecha_fin)}</div></div>
+      <div class="meta-field"><span class="mf-label">Responsable</span><div class="mf-value">${p.responsable||'—'}</div></div>
+    </div>
+    <div class="body">
+      <div class="section-header"><h2>Registro de Movimientos</h2><div class="section-line"></div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Fecha</th><th>Tipo</th><th>Modalidad</th><th>Origen</th><th>Destino</th><th>Concepto</th><th class="r">Monto $</th>
+          </tr></thead>
+          <tbody>${filas}</tbody>
+          <tfoot>
+            <tr class="tfoot-row"><td colspan="5"></td><td class="tot-label">Ingresos</td><td class="r"><span class="tot-val pos">${fmt(totIngr)}</span></td></tr>
+            <tr class="tfoot-row"><td colspan="5"></td><td class="tot-label">Egresos</td><td class="r"><span class="tot-val neg">${fmt(totEgr)}</span></td></tr>
+            <tr class="tfoot-row"><td colspan="5"></td><td class="tot-label">Neto</td><td class="r"><span class="tot-val ${neto>=0?'gold':'neg'}">${fmt(neto)}</span></td></tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="neto-bar">
+        <span class="nb-label">Saldo Neto del Período</span>
+        <span class="nb-val ${neto>=0?'pos':'neg'}">${neto<0?'−':''}${fmt(Math.abs(neto))}</span>
+      </div>
+      <div class="section-header"><h2>Estado por Caja / Fondo</h2><div class="section-line"></div></div>
+      <div class="cajas-grid">${cajasHTML || '<div class="empty-msg">Sin movimientos en cajas.</div>'}</div>
+    </div>
+  `;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ESTADO DE CUENTA
+══════════════════════════════════════════════════════════ */
+function buildECSelector() {
+  const sel = document.getElementById('sel-ec');
+  sel.innerHTML = ecData
+    .filter(e => e.cliente)
+    .map((e,i) => `<option value="${i}">${e.cliente} — ${(e.valuaciones||[]).length} valuaciones</option>`)
+    .join('');
+}
+
+function renderEC() {
+  const idx = parseInt(document.getElementById('sel-ec').value) || 0;
+  const filtered = ecData.filter(e => e.cliente);
+  const ec = filtered[idx];
+  if(!ec) { document.getElementById('ec-doc').innerHTML='<div class="empty-msg">Sin estados de cuenta.</div>'; return; }
+
+  const vals = ec.valuaciones || [];
+  const pags = ec.pagos || [];
+
+  let totPres=0, totAntic=0, totPag=0;
+  pags.forEach(p => totPag += parseFloat(p.monto)||0);
+
+  const valFilas = vals.map(v => {
+    const pres = parseFloat(v.presupuesto)||0;
+    const antic = parseFloat(v.anticipo)||0;
+    const pct = pres > 0 ? Math.round(antic/pres*100) : 0;
+    const saldo = Math.max(0, pres - antic);
+    totPres += pres;
+    totAntic += antic;
+    return `<tr>
+      <td>${v.desc||'—'}</td>
+      <td class="r">${fmt(pres)}</td>
+      <td><span class="pct-badge ${pct===0?'pct-zero':pct>=100?'pct-full':''}">${pct}%</span></td>
+      <td class="r">${fmt(antic)}</td>
+      <td class="r"><span class="saldo-cell ${saldo===0?'saldo-zero':''}">${fmt(saldo)}</span></td>
+    </tr>`;
+  }).join('');
+
+  const pagFilas = pags.map(p => `<tr>
+    <td>${fmtDate(p.fecha)}</td>
+    <td>${p.modalidad||'—'}</td>
+    <td class="r">${fmt(p.monto)}</td>
+    <td>${p.aplicaA||'—'}</td>
+  </tr>`).join('');
+
+  const porCobrar = Math.max(0, totPres - totPag);
+  document.getElementById('ec-info').textContent = `${vals.length} valuaciones · ${pags.length} pagos`;
+
+  // KPIs
+  document.getElementById('ec-kpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-card-label">Total Presupuesto</div><div class="kpi-card-value gold">${fmt(totPres)}</div></div>
+    <div class="kpi-card"><div class="kpi-card-label">Total Pagado</div><div class="kpi-card-value pos">${fmt(totPag)}</div></div>
+    <div class="kpi-card"><div class="kpi-card-label">Por Cobrar</div><div class="kpi-card-value neg">${fmt(porCobrar)}</div></div>
+  `;
+
+  document.getElementById('ec-doc').innerHTML = `
+    <div class="header">
+      <div><div class="logo-text">Milagros Sánchez</div><div class="logo-sub">Arquitectura · Interiorismo · Construcción</div></div>
+      <div class="doc-meta">
+        <div class="doc-label">Documento</div>
+        <div class="doc-title">Estado de Cuenta</div>
+        <div class="doc-sub">Valuaciones · Pagos · Saldos</div>
+        <div class="doc-date">${fmtDate(ec.fecha)}</div>
+      </div>
+    </div>
+    <div class="meta-section">
+      <div class="meta-field"><span class="mf-label">Cliente</span><div class="mf-value">${ec.cliente||'—'}</div></div>
+      <div class="meta-field"><span class="mf-label">Fecha</span><div class="mf-value">${fmtDate(ec.fecha)}</div></div>
+      <div class="meta-field"><span class="mf-label">Referencia</span><div class="mf-value">${ec.referencia||'—'}</div></div>
+      <div class="meta-field"><span class="mf-label">Nota</span><div class="mf-value">${ec.nota||'—'}</div></div>
+    </div>
+    <div class="body">
+      <div class="section-header"><h2>Valuaciones</h2><div class="section-line"></div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Descripción</th><th class="r">Presupuesto</th><th>Avance</th><th class="r">Anticipo/Cobrado</th><th class="r">Saldo</th></tr></thead>
+          <tbody>${valFilas || '<tr><td colspan="5" class="empty-msg">Sin valuaciones.</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div class="section-header"><h2>Pagos Recibidos</h2><div class="section-line"></div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Fecha</th><th>Modalidad</th><th class="r">Monto</th><th>Aplica a</th></tr></thead>
+          <tbody>${pagFilas || '<tr><td colspan="4" class="empty-msg">Sin pagos registrados.</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div class="neto-bar">
+        <span class="nb-label">Por Cobrar</span>
+        <span class="nb-val ${porCobrar>0?'neg':'pos'}">${fmt(porCobrar)}</span>
+      </div>
+    </div>
+  `;
+}
+
+/* ══════════════════════════════════════════════════════════
+   INIT + AUTO-REFRESH
+══════════════════════════════════════════════════════════ */
+loadFromCloud();
+setInterval(loadFromCloud, 30000); // Actualizar cada 30 segundos
+</script>
+</body>
+</html>
