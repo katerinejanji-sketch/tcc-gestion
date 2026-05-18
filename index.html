@@ -679,7 +679,7 @@ tbody td{padding:8px 8px 8px 0;font-size:14px;vertical-align:middle;}
 <script>
 
 /* ═══ LOGIN ═══ */
-var LG_USERS={'1234':{n:'Katherine Janji',r:'admin',a:'KJ'},'9090':{n:'Milagros Sánchez',r:'visual',a:'MS'},'0000':{n:'Jannys Cordero',r:'costos',a:'JC'},'2580':{n:'Enrique Giménez',r:'fondos',a:'EG'}};
+var LG_USERS={'1103':{n:'Katherine Janji',r:'admin',a:'KJ'},'0902':{n:'Milagros Sánchez',r:'visual',a:'MS'},'2912':{n:'Jannys Cordero',r:'costos',a:'JC'},'0603':{n:'Enrique Giménez',r:'fondos',a:'EG'}};
 var LG_ROLES={admin:'Administrador',costos:'Costos de Obra',visual:'Solo Lectura',fondos:'Reportes de Fondos'};
 var lgPin=null;
 (function(){var c=document.getElementById('lgcards');Object.keys(LG_USERS).forEach(function(p){var u=LG_USERS[p];var d=document.createElement('div');d.className='user-card';d.innerHTML='<div class="user-card-name">'+u.n+'</div><div class="user-card-role">'+(LG_ROLES[u.r]||u.r)+'</div>';d.onclick=function(){lgSelect(p);};c.appendChild(d);});})();
